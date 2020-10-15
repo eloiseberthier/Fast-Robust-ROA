@@ -3,7 +3,6 @@ function [tmin, L] = nbldi(Lshp, A, B, C, S0)
 setlmis([]);    
                                          
 Lv=lmivar(1,Lshp);
-%Lv=lmivar(1,[1 1; 1 1; 1 1; 1 1; 1 1; 1 1; 1 1; 1 1; 1 1; 1 1; 1 1; 1 1; 1 1; 1 1; 1 1; 1 1]);
 
 lmiterm([-1 1 1 Lv],1,1);                        % LMI #1: L
 lmiterm([2 1 1 Lv],C',C);                        % LMI #2: C'*L*C
