@@ -1,6 +1,5 @@
 from __future__ import print_function
 import numpy as np
-import scipy
 import matplotlib
 matplotlib.rcParams['pdf.fonttype'] = 42;
 matplotlib.rcParams['ps.fonttype'] = 42
@@ -9,17 +8,15 @@ import math
 import torch
 from torch.autograd import Variable
 from torch import autograd
-from sklearn import linear_model
+import scipy
 from scipy.linalg import solve_lyapunov
 from scipy.integrate import ode, odeint
-import pandas as pd
 from sklearn import linear_model
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 import matlab.engine
 import time
 import pandas as pd
-import time
 import robust_bounds as rb
 
 exp_name = 'vanderpol'
@@ -72,7 +69,7 @@ for t in range(N):
     Ss.append(sol[t].reshape((d, d)))
 Ss.reverse()
 
-# helpers for adaptive version
+# helpers for order 2 version
 def sample_hessians(p=10):
     hessians = np.zeros((p, d, d, d))
     points = np.zeros((p, d+1))
@@ -94,7 +91,7 @@ def fit_hessians(points, hessians, Pinvs=np.eye(d)):
                 coefs[idx,i,j,:] = model.coef_
     return coefs
 def ada_bound_hessians(x0, Sinv, rho0, coefs):
-    # solve sup cT x on xTS0x<1 and give bound on S0, rho=1, around x0
+    # solve sup cT x on xTS0x<rho0 and give bound on S0, around x0
     bd = np.zeros((d, d, d))
     for idx in range(d):
         for i in range(d):
@@ -104,9 +101,9 @@ def ada_bound_hessians(x0, Sinv, rho0, coefs):
                 ray = np.sqrt(rho0 * c @ Sinv @ c.T)
                 bd[idx,i,j] = max(abs(intercept+ray), abs(intercept-ray))
     return bd
-points, hessians = sample_hessians() # used everywhere
+points, hessians = sample_hessians() # sample hessians for later use
 
-# adaptive version
+# Order two a bound
 def rho_dynamics(rv, t, Ss, xs, Q, N, t1, rd0=10., eta=0.9):
     # iterative, P-1/2 rescaling
     idx = int( (N - 1)/t1 * (t1 - t) )
@@ -117,7 +114,7 @@ def rho_dynamics(rv, t, Ss, xs, Q, N, t1, rd0=10., eta=0.9):
     rdot = rd0
     lastrdot = rdot
     while flag:
-        Uis = scipy.linalg.sqrtm(np.linalg.inv(Q + rdot/rv*S0)).real #Q+SBK, B=0
+        Uis = scipy.linalg.sqrtm(np.linalg.inv(Q + rdot/rv*S0)).real # Q+SBK omitted, B=0
         coefs = fit_hessians(points, hessians, Uis)
         bd = ada_bound_hessians(xs[idx], S0inv, rv, coefs)
         M = np.zeros((d, d))
@@ -129,11 +126,7 @@ def rho_dynamics(rv, t, Ss, xs, Q, N, t1, rd0=10., eta=0.9):
             lastrdot = rdot
             rdot = eta*rdot
     return lastrdot
-
-
-
 init_t2 = time.process_time()
-
 rho0 = 1.
 eta = 0.9
 rd0 = 2.
@@ -143,15 +136,10 @@ for t in range(N-1):
     print(rhos[-1], t)
 rhos.reverse()
 print(rhos)
-
 t2 = time.process_time() - init_t2
 
 ### Order one bound
-
-
 eng = matlab.engine.start_matlab()
-
-
 def rho_dynamics(rv, t, Ss, xs, As, Q, N, t1, rd0=10., eta=0.9):
 	# iterative, P-1/2 rescaling
 	idx = int( (N - 1)/t1 * (t1 - t) )
@@ -182,26 +170,25 @@ def rho_dynamics(rv, t, Ss, xs, As, Q, N, t1, rd0=10., eta=0.9):
 		L_shp = [list([1, 1]) for i in range(d**2)]
 		tmin, L = eng.nbldi(matlab.double(L_shp), matlab.double(A_arg),  matlab.double(B_arg),  matlab.double(C_arg),
 				  matlab.double(S_arg), nargout=2)
-		flag = tmin<0 #tmin >= 0
+		flag = tmin<0
 		if flag:
 			lastrdot = rdot
 			rdot = eta * rdot - (1. - eta)* 1.
 	return lastrdot
-
-
 init_t1 = time.process_time()
-
 rho0 = 1.
 eta = 0.95
-rd0 = 2.#0.01
+rd0 = 2.
 rhos1 = [rho0]
 for t in range(N-1):
     rhos1.append(rhos1[-1] - dt*rho_dynamics(rhos1[-1], ts[t], Ss, xs, As, Q, N, t1, rd0=rd0, eta=eta))
     print(rhos1[-1], t)
 rhos1.reverse()
 print(rhos1)
-
 t1 = time.process_time() - init_t1
+print('Times:')
+print('1st order', t1)
+print('2nd order', t2)
 
 ### Import results for SOS bound
 file0 = open('ts.txt', 'r') 
@@ -209,7 +196,6 @@ Lines = file0.readlines()
 tsbis = []
 for line in Lines: 
     tsbis.append(float(line.strip()))
-
 file1 = open('itr1.txt', 'r') 
 Lines = file1.readlines() 
 itr1 = []
@@ -223,10 +209,8 @@ for line in Lines:
 print(itr1)
 print(itr2)
 
-print('Times:')
-print('1st order', t1)
-print('2nd order', t2)
 
+# Plot the results of the different methods
 plt.figure(figsize=(7, 4.2))
 plt.xlabel(r'$t$', size=15)
 plt.ylabel(r'$\rho(t)$', size=15)
@@ -242,31 +226,27 @@ plt.savefig('./tv_vanderpol.pdf')
 plt.show()
  
 
+# Plot a funnel
 plt.figure(figsize=(10, 6))
-
 # le fond
 plt.fill(xlim[:, 0], xlim[:, 1], facecolor='chartreuse', alpha=0.4, edgecolor='black', linewidth=1)
-
-# ROA of 0: R
+# ROA of 0 (R)
 ROA = np.array([[ 1.5, -0.5],
        [-0.5,  1. ]])
 th = np.linspace(-math.pi, math.pi, 100)
 E = np.linalg.inv(scipy.linalg.sqrtm(ROA/2.3))
 ell = E @ np.array([np.cos(th), np.sin(th)])
 plt.fill(ell[0,:], ell[1,:],  facecolor=[0.9, 0.9, 0.9],   linewidth=1)
-
 # B_f
 th = np.linspace(-math.pi, math.pi, 100)
-E = np.linalg.inv(scipy.linalg.sqrtm(Starget))#S0/rhoCS))
+E = np.linalg.inv(scipy.linalg.sqrtm(Starget))
 ell = E @ np.array([np.cos(th), np.sin(th)]) + np.array([xT for i in range(100)]).T
 plt.fill(ell[0,:], ell[1,:],  facecolor=[1, 0., 0.], edgecolor='black', linewidth=1)
-
 # B(t)
 for idx in range(N-1, -1, -1):
     E = np.linalg.inv(scipy.linalg.sqrtm(Ss[idx]/rhos1[idx]))
     ell = E @ np.array([np.cos(th), np.sin(th)]) + np.repeat([xs[idx]], 100, axis=0).T
     plt.fill(ell[0,:], ell[1,:], facecolor=[0.8, 0.8, 0.8], edgecolor='black', linewidth=1, alpha=0.5)
-
 # trajectory
 xs = np.array(xs)
 x = xs[:,0]
@@ -277,13 +257,11 @@ for i in range(0, len(x)-1, 4):
     if ( x[i+1] < x[i]): theta = theta - math.pi
     plt.arrow(x[i], y[i], 0.05*np.cos(theta), 0.05 * np.sin(theta), width= 0.01,
     head_width=0.06, head_length=0.15, facecolor='black')
-
+# annotations
 plt.annotate(r'$\mathcal{B}_f$', xy=(-0.6, -1.7), size=30, color='red' )
 plt.annotate(r'$\mathcal{B}(t)$', xy=(-0.3, 1.2), size=30, color='black' )
 plt.annotate(r'$\mathcal{R}$', xy=(1, 0.2), size=30, color=[0.5, 0.5, 0.5] )
 plt.axis('off')
 plt.savefig('./funnel.pdf')
 plt.show()
-
-
 
