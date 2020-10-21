@@ -18,4 +18,5 @@ The main results (Table 1 and 2) can be reproduced by running `vanderpol_runner.
 The main algorithm is defined in `robust_bounds.py`. You can add another dynamics by creating two files:
 + `mydynamics_config.py` defines f, an oracle for the bounds on the Jacobian/Hessian, the parameters of the LQR...
 + `mydynamics_runner.py` chooses which certificate to run and defines some parameters.
+
 If the files follow the same structure as for the existing dynamics, you only need to run `mydynamics_runner.py`.
