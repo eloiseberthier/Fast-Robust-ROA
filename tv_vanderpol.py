@@ -222,7 +222,7 @@ plt.plot(tsbis, itr1, linewidth=3, linestyle=':', color='black', label='SOS itr 
 plt.plot(tsbis, itr2, linewidth=3, linestyle='--', color='black', label='SOS itr 2')
 plt.legend(prop={"size":15})
 #plt.title('Time-varying Vanderpol')
-plt.savefig('./tv_vanderpol.pdf')
+plt.savefig('./plots/tv_vanderpol.pdf')
 plt.show()
  
 
@@ -262,6 +262,6 @@ plt.annotate(r'$\mathcal{B}_f$', xy=(-0.6, -1.7), size=30, color='red' )
 plt.annotate(r'$\mathcal{B}(t)$', xy=(-0.3, 1.2), size=30, color='black' )
 plt.annotate(r'$\mathcal{R}$', xy=(1, 0.2), size=30, color=[0.5, 0.5, 0.5] )
 plt.axis('off')
-plt.savefig('./funnel.pdf')
+plt.savefig('./plots/funnel.pdf')
 plt.show()
 
