@@ -8,8 +8,8 @@ This code computes certified regions of attraction around an equilibrium, given:
 + a function to compute entrywise bounds on the Jacobian or Hessian of f.
 
 ## Requirements
-The code is written in Python but the first-order certificate calls a Matlab backend engine.
-Other requirements include the `pinocchio` ([here](https://github.com/stack-of-tasks/pinocchio)) and `example-robot-data` ([there] (https://github.com/Gepetto/example-robot-data)) libraries, only used for the last example on a robotic arm.
+The code is written in Python but the first-order certificate calls a Matlab backend engine to run the script `nbldi.m`.
+Other requirements include the `pinocchio` ([here](https://github.com/stack-of-tasks/pinocchio)) and `example-robot-data` ([there](https://github.com/Gepetto/example-robot-data)) libraries, only used for the last example on a robotic arm. All the requirements are listed in `requirements.txt`.
  
 ## Reproducing the results and plots of the paper
 The main results (Table 1 and 2) can be reproduced by running `vanderpol_runner.py`, `satellite_runner.py`, `pendulum_runner.py` (x0 can be changed in `pendulum_config.py` to switch between the bottom of top positions), and `ur5_runner.py`. The results are stored in a csv file in a folder of the same name. Figure 1 is produced by running `Plot-results.ipynb`. Figures 2 and 3 are produced by the script `tv_vanderpol.py`.
