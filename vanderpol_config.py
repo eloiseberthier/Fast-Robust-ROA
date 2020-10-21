@@ -1,15 +1,13 @@
 from __future__ import print_function
 import numpy as np
-import scipy
 import matplotlib.pyplot as plt
 import math
 import torch
 from torch.autograd import Variable
 from torch import autograd
-from sklearn import linear_model
+import scipy
 from scipy.linalg import solve_lyapunov
 from scipy.integrate import ode, odeint
-import pandas as pd
 from sklearn import linear_model
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
@@ -17,9 +15,7 @@ import matlab.engine
 import time
 import pandas as pd
 
-#global d, m, Q, R, x0, u0, A0, B0, Rinv, S0, S0inv, S0invs, S0sq, K0, f, jacobian, hessian, bound_hessians, bound_jacobian
-
-# dynamics, can be replaced by anything else
+# Dynamics, can be replaced by anything else
 d = 2
 m = 1 # unactuated, B = 0
 xlim = pd.read_csv('xlim.csv', header=None)
@@ -35,14 +31,13 @@ def hessian(x):
     hess[1,:,:] = np.array([[2.*x[1], 2.*x[0]], [2.*x[0], 0.]])
     return hess
 
-
 def bound_hessians(x0, S0invs, P0invs, rho_upper, p=0):
     # Since P0 = I for Q=I, the coefficients are computed manually and fixed
     coefs = np.zeros((2, 2, 2, 3)) # coord 0 of x is intercept of affine model
     coefs[1, 0, 0, 2] = 2
     coefs[1, 0, 1, 1] = 2
     coefs[1, 1, 0, 1] = 2
-    # solve sup cT x on xTS0x<1 and give bound on S0, rho=1
+    # solve sup cT x on xTS0x<1 and give bound on S0
     S0inv = S0invs @ S0invs
     bd = np.zeros((2, 2, 2))
     for idx in range(2):
@@ -66,7 +61,7 @@ def bound_jacobian(x0, S0invs, rho_upper, p=500):
 		A = (np.min(jacob, axis=0) + np.max(jacob, axis=0))/2.
 		bounds = np.max(abs(jacob - A), axis=0)
 	elif p==0:
-		# no sampling version for this simple quadratic jacobian
+		# a no-sampling version for this simple quadratic jacobian
 		J1 = np.array([[0, 1], [1, 0]])
 		bd1d = rho_upper * np.min(np.linalg.eigvals( S0invs @ J1 @ S0invs))
 		bd1u = rho_upper * np.max(np.linalg.eigvals( S0invs @ J1 @ S0invs))

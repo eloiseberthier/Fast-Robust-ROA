@@ -1,15 +1,13 @@
 from __future__ import print_function
 import numpy as np
-import scipy
 import matplotlib.pyplot as plt
 import math
 import torch
 from torch.autograd import Variable
 from torch import autograd
-from sklearn import linear_model
+import scipy
 from scipy.linalg import solve_lyapunov
 from scipy.integrate import ode, odeint
-import pandas as pd
 from sklearn import linear_model
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
@@ -17,9 +15,7 @@ import matlab.engine
 import time
 import pandas as pd
 
-#global d, m, Q, R, x0, u0, A0, B0, Rinv, S0, S0inv, S0invs, S0sq, K0, f, jacobian, hessian, bound_hessians, bound_jacobian
-
-# dynamics, can be replaced by anything else
+# Dynamics, can be replaced by anything else
 d = 6
 m = 3
 Is = np.array([5., 3., 2.])

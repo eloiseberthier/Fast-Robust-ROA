@@ -1,15 +1,13 @@
 from __future__ import print_function
 import numpy as np
-import scipy
 import matplotlib.pyplot as plt
 import math
 import torch
 from torch.autograd import Variable
 from torch import autograd
-from sklearn import linear_model
+import scipy
 from scipy.linalg import solve_lyapunov
 from scipy.integrate import ode, odeint
-import pandas as pd
 from sklearn import linear_model
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
@@ -19,9 +17,6 @@ import pandas as pd
 import pinocchio
 from pinocchio.utils import *
 import example_robot_data
-import math
-import scipy.linalg
-import numpy as np
 
 # dynamics, can be replaced by anything else
 d = 12
@@ -33,7 +28,7 @@ v = pinocchio.utils.zero(robot.model.nv)
 a = pinocchio.utils.zero(robot.model.nv)
 u0 = pinocchio.rnea(robot.model, robot.data, q0, v, a) # recursive Newton-Euler
 x0 = np.zeros(12)
-x0[:6] = q0 #u0 has been defined above
+x0[:6] = q0 # u0 has been defined above
 
 def f(x, u):
     q = x[:6]

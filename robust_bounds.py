@@ -1,15 +1,13 @@
 from __future__ import print_function
 import numpy as np
-import scipy
 import matplotlib.pyplot as plt
 import math
 import torch
 from torch.autograd import Variable
 from torch import autograd
-from sklearn import linear_model
+import scipy
 from scipy.linalg import solve_lyapunov
 from scipy.integrate import ode, odeint
-import pandas as pd
 from sklearn import linear_model
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
@@ -18,12 +16,12 @@ import time
 import pandas as pd
 
 
-
-# helpers
+# Helpers
 def round_up(n, decimals=0): 
     multiplier = 10 ** decimals 
     return math.ceil(n * multiplier) / multiplier
 def print_matrix(M, name):
+	# print numpy matrix, matlab style
     m, n = M.shape
     print(name,'= [ ', end='')
     for i in range(m):
@@ -33,13 +31,13 @@ def print_matrix(M, name):
             print('; ', end='\n')
     print('];')
 def volume(S, rho):
-    # only up to constants, should be this vol*Vol(B(0,1))
+    # only up to constants, the real volume is this*Vol(B(0,1))
     d = S.shape[0]
     return rho**(d/2)/np.linalg.det(S)**(1/2)
 
 
 
-
+# Algorithm 1 with rho_1
 def one_bound(rho_upper, eta, p, cfg):
 	# Order one bound
 	d, m, Q, R, x0, u0, A0, B0, Rinv, S0, S0inv, S0invs, S0sq, K0, f, jacobian, hessian, bound_hessians, bound_jacobian = cfg
@@ -77,10 +75,9 @@ def one_bound(rho_upper, eta, p, cfg):
 
 
 
-
-
+# Algorithm 1 with rho_a
 def twocs_bound(rho_upper, eta, p, cfg):
-	# CS bound
+	# A bound
 	d, m, Q, R, x0, u0, A0, B0, Rinv, S0, S0inv, S0invs, S0sq, K0, f, jacobian, hessian, bound_hessians, bound_jacobian = cfg
 	rho_init = rho_upper
 	P0 = Q + S0 @ B0 @ K0
@@ -111,7 +108,7 @@ def twocs_bound(rho_upper, eta, p, cfg):
 
 
 
-
+# Algorithm 1 with rho_b
 def twob_bound(rho_upper, eta, p, cfg):
 	# B bound
 	d, m, Q, R, x0, u0, A0, B0, Rinv, S0, S0inv, S0invs, S0sq, K0, f, jacobian, hessian, bound_hessians, bound_jacobian = cfg

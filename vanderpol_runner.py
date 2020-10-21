@@ -1,15 +1,13 @@
 from __future__ import print_function
 import numpy as np
-import scipy
 import matplotlib.pyplot as plt
 import math
 import torch
 from torch.autograd import Variable
 from torch import autograd
-from sklearn import linear_model
+import scipy
 from scipy.linalg import solve_lyapunov
 from scipy.integrate import ode, odeint
-import pandas as pd
 from sklearn import linear_model
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
@@ -30,16 +28,14 @@ cfg = d, m, Q, R, x0, u0, A0, B0, Rinv, S0, S0inv, S0invs, S0sq, K0, f, jacobian
 print('Prepared for x=', str(x0))
 print('R=', str(R)) 
 
-for p in [0] + list(np.logspace(1, 4, 10)):
-	p = int(p)
-	# Order one bound
-	eta = 0.99
-	rho_upper = 1. ##########
-	#p = 10000 ########## do the sampling if p>0, explicit comp if p=0
-	res = rb.one_bound(rho_upper, eta, p, cfg)
-	df = df.append(pd.DataFrame([res], columns=cols))
+# Order one bound
+eta = 0.99
+rho_upper = 1. ##########
+p = 0 ########## 10000 # do the sampling if p>0, explicit comp if p=0
+res = rb.one_bound(rho_upper, eta, p, cfg)
+df = df.append(pd.DataFrame([res], columns=cols))
 
-# CS bound
+# A bound
 eta = 0.99
 rho_upper = 1. ##########
 p = 0 ##########

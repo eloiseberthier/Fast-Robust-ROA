@@ -1,2 +1,7 @@
 *.csv
 !xlim.csv
+!vanderpol/2020-10-21-13-16-11.csv
+!satellite/2020-07-24-14-23-35.csv
+!pendulum/2020-07-27-14-25-39.csv
+!pendulum/2020-08-03-16-20-40.csv
+!ur5/2020-10-05-10-16-00.csv

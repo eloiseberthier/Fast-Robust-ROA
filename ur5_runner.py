@@ -1,15 +1,13 @@
 from __future__ import print_function
 import numpy as np
-import scipy
 import matplotlib.pyplot as plt
 import math
 import torch
 from torch.autograd import Variable
 from torch import autograd
-from sklearn import linear_model
+import scipy
 from scipy.linalg import solve_lyapunov
 from scipy.integrate import ode, odeint
-import pandas as pd
 from sklearn import linear_model
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
@@ -33,21 +31,21 @@ print('R=', str(R))
 # Order one bound
 eta = 0.9
 rho_upper = 5e-4
-p = 50000#1000 ##########
+p = 50000 ##########
 res = rb.one_bound(rho_upper, eta, p, cfg)
 df = df.append(pd.DataFrame([res], columns=cols))
 
 # CS bound
 eta = 0.9
 rho_upper = 2e-3
-p = 50000#1000 ##########
+p = 50000 ##########
 res = rb.twocs_bound(rho_upper, eta, p, cfg)
 df = df.append(pd.DataFrame([res], columns=cols))
 
 # B bound
 eta = 0.9
 rho_upper = 3e-3
-p = 50000#1000 ##########
+p = 50000 ##########
 res = rb.twob_bound(rho_upper, eta, p, cfg)
 df = df.append(pd.DataFrame([res], columns=cols))
 

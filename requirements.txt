@@ -1,0 +1,12 @@
+python=3.8.5
+numpy=1.19.1
+scipy=1.5.2
+matplotlib
+math
+torch
+sklearn
+matlab
+time
+pandas
+pinocchio=2.5.0
+example_robot_data
